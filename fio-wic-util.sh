@@ -49,7 +49,7 @@ usage()
 
 detect_wic()
 {
-  WIC=$(ls $WORKDIR | grep -E "\.wic")
+  WIC=$(ls $WORKDIR | grep -E "\.wic$")
   if [ $? -ne 0 ]; then
     echo "ERROR: No previously extracted .wic file detected."
     echo " Please use the unzip command to unzip a wic.gz first."
@@ -120,9 +120,14 @@ mount_wic_part()
   echo "Mounting $WIC to $WICMNTPATH ..."
   OFFSET=$(fdisk -l $WIC | grep $WICPART | awk '{ print $2 }')
   sudo mount -o loop,offset=$((512 * $OFFSET)) $WIC $WICMNTPATH
-
-  echo
-  echo "Successfully mounted $WIC partition $WICPART on $WICMNTPATH"
+  if [ $? -ne 0 ]; then
+    echo
+    echo "ERROR: Failed to mount!"
+    exit 1
+  else
+    echo
+    echo "Successfully mounted $WIC partition $WICPART on $WICMNTPATH"
+  fi
 }
 
 unmount_wic_part()
